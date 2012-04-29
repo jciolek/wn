@@ -1,0 +1,3 @@
+#log li li {color: red;}
+#log li.complete {color: green;}
+#log li.complete li {color: gray;}
