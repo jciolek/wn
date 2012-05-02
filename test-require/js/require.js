@@ -3,10 +3,12 @@ wn.loader.addMapping('Test.File3', 'js/file3.js');
 wn.loader.addMapping('Test.File4', 'js/file4.js');
 // second namespace defined in files4.js
 wn.loader.addMapping('Test.File4.extra', 'js/file4.js');
+wn.loader.addMapping('log', '../test-common/js/common.js');
 // and those which also need onload notification
 wn.loader.addMapping('files.common', '../test-common/js/common.js', true);
 
-wn.require('files.common', function() {
+// you can require the same file many times using different namespaces: 
+wn.require(['files.common', 'log'], function() {
 	wn('log')
 		.log('require.js: 1st require() complete')
 		.sub('files.common loaded ok, log operational')
