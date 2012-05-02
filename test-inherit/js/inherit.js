@@ -2,6 +2,9 @@
 wn.loader.addMapping('files.common', '../test-common/js/common.js', true);
 
 wn.require('files.common', function() {
+	// preloading jQuery for later use, so far nothing depends on it
+	wn.require('files.jQuery');
+	
 	var log = wn('log');
 	function assert(condition) {
 		return condition ? ' [ok]' : ' [error]';
@@ -67,7 +70,7 @@ wn.require('files.common', function() {
 	log.goUp();
 
 	wn.require('files.jQuery', function() {
-		log('jQuery loaded');
+		log('jQuery loaded').sub('colouring results');
 		$('#log > ul > li > ul > li:contains("[ok]")').addClass('complete');
 	});
 });
