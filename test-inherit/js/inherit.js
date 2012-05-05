@@ -11,7 +11,7 @@ wn.require('files.common', function() {
 	}
 	
 	log('inherit.js: loaded');
-	log('constructor function A() with properties prop1, prop2, prop3 and static sf(); instance a').goDown();
+	log('constructor function A() with properties prop1, prop2, prop3 and static sf()').goDown();
 	function A() {}
 	A.sf = function sf() {
 		return 'called A.sf()';
@@ -21,26 +21,35 @@ wn.require('files.common', function() {
 		prop2: 'prop2 from A',
 		prop3: 'prop3 from A'
 	});
-	
-	var a = new A;
+	wn('class.A', A);
+	log('setting namespace wn(\'class.A\') ' + assert(wn('class.A') === A));
 	log('A.prototype.constructor = ' + A.prototype.constructor + assert(A.prototype.constructor === A));
 	log('A.sf() returns: "' + A.sf() + '"' + assert(A.sf() === 'called A.sf()'));
+
+	var a = new (wn('class.A'));
+	log('creating instance a = new (wn(\'class.A\'))');
 	log('a instanceof A = ' + (a instanceof A) + assert(a instanceof A));
 	log('a.prop1 = "' + a.prop1 + '"' + assert(a.prop1 === 'prop1 from A'));
 	log('a.prop2 = "' + a.prop2 + '"' + assert(a.prop2 === 'prop2 from A'));
 	log('a.prop3 = "' + a.prop3 + '"' + assert(a.prop3 === 'prop3 from A'));
 	log.goUp();
 	
-	log('constructor function B() with property prop2 inheriting from A(); instance b').goDown();
+
+	log('constructor function B() with property prop2 inheriting from A()').goDown();
 	function B() {}
-	wn.inherit(B, A);
+	log('inheritance through namespace: wn.inherit(B, \'class.A\')');
+	wn.inherit(B, 'class.A');
 	wn.extend(B.prototype, {
 		prop2: 'prop2 from B'
 	});
-	var b = new B;
-	
+	log('B.parent = ' + B.parent + assert(B.parent === A));
+	wn('class.B', B);
+	log('setting namespace wn(\'class.B\') ' + assert(wn('class.B') === B));
 	log('B.prototype.constructor = ' + B.prototype.constructor + assert(B.prototype.constructor === B));
 	log('B.sf() returns: "' + B.sf() + '"' + assert(B.sf() === 'called A.sf()'));
+
+	var b = new (wn('class.B'));
+	log('creating instance b = new (wn(\'class.C\'))');
 	log('b instanceof B = ' + (b instanceof B) + assert(b instanceof B));
 	log('b instanceof A = ' + (b instanceof A) + assert(b instanceof A));
 	log('b.prop1 = "' + b.prop1 + '"' + assert(b.prop1 == 'prop1 from A'));
@@ -49,8 +58,10 @@ wn.require('files.common', function() {
 	log('b.parent.prop2 = "' + b.parent.prop2 + '"' + assert(b.parent.prop2 === 'prop2 from A'));
 	log.goUp();
 	
-	log('constructor function C() with property prop3 and static sf, inheriting from B(); instance c').goDown();
+
+	log('constructor function C() with property prop3 and static sf, inheriting from B()').goDown();
 	function C() {}
+	log('inheritance through constructor function: wn.inherit(C, B)');
 	wn.inherit(C, B);
 	C.sf = function sf() {
 		return 'called C.sf()';
@@ -58,11 +69,15 @@ wn.require('files.common', function() {
 	wn.extend(C.prototype, {
 		prop3: 'prop3 from C'
 	});
-	var c = new C;
-	
+	log('C.parent = ' + C.parent + assert(C.parent === B));
+	wn('class.C', C);
+	log('setting namespace wn(\'class.C\') ' + assert(wn('class.C') === C));
 	log('C.prototype.constructor = ' + C.prototype.constructor + assert(C.prototype.constructor === C));
 	log('C.sf() returns: "' + C.sf() + '"' + assert(C.sf() === 'called C.sf()'));
 	log('C.parent.sf() returns: "' + C.parent.sf() + '"' + assert(C.parent.sf() === 'called A.sf()'));
+
+	var c = new (wn('class.C'));
+	log('creating instance c = new (wn(\'class.C\'))');
 	log('c instanceof C = ' + (c instanceof C) + assert(c instanceof C));
 	log('c instanceof B = ' + (c instanceof B) + assert(c instanceof B));
 	log('c instanceof A = ' + (c instanceof A) + assert(c instanceof A));

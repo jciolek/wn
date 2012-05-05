@@ -377,7 +377,7 @@
 		 * Provides full single inheritance for constructors
 		 * 
 		 * @param {function} C - Child constructor function
-		 * @param {function} P - Parent constructor function
+		 * @param {function|string} P - Parent constructor function or namespace for it
 		 * 
 		 * @description Preserves inheritance chain, therefore:
 		 * Child instanceof Parent == true
@@ -387,12 +387,26 @@
 			var F = function () {};
 			
 			return function inherit(C, P) {
+				// parent can be also a namespace
+				if (typeof P === 'string') {
+					P = this.ns(P);
+				}
+				
+				// be strict about the types of parameters given
+				if (typeof C !== 'function') {
+					throw new TypeError('WN::inherit(): C parameter is expected to be a function, ' + typeof C + ' given.');
+				}
+				if (typeof P !== 'function') {
+					throw new TypeError('WN::inherit(): P parameter is expected to be a function, ' + typeof P + ' given.');
+				}
+				
 				var PPrototype = P.prototype,
 					CPrototype = C.prototype,
 					i;
 				
 				F.prototype = PPrototype;
 				C.prototype = new F();
+				// copy instance properties
 				for (i in CPrototype) {
 					if (CPrototype.hasOwnProperty(i)) {
 						C.prototype[i] = CPrototype[i];
@@ -401,13 +415,13 @@
 				C.prototype.constructor = C;
 				C.prototype.parent = PPrototype;
 				
-				// copy static properties
-				C.parent = P;
+				// copy constructor properties
 				for (i in P) {
 					if (P.hasOwnProperty(i)) {
 						C[i] = P[i];
 					}
 				}
+				C.parent = P;
 			}
 		})()
 	});
