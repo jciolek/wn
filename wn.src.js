@@ -400,6 +400,14 @@
 				}
 				C.prototype.constructor = C;
 				C.prototype.parent = PPrototype;
+				
+				// copy static properties
+				C.parent = P;
+				for (i in P) {
+					if (P.hasOwnProperty(i)) {
+						C[i] = P[i];
+					}
+				}
 			}
 		})()
 	});

@@ -11,19 +11,20 @@ wn.require('files.common', function() {
 	}
 	
 	log('inherit.js: loaded');
-	log('constructor function A() with properties prop1, prop2, prop3; instance a').goDown();
-	function A()
-	{
-		
+	log('constructor function A() with properties prop1, prop2, prop3 and static sf(); instance a').goDown();
+	function A() {}
+	A.sf = function sf() {
+		return 'called A.sf()';
 	}
 	wn.extend(A.prototype, {
 		prop1: 'prop1 from A',
 		prop2: 'prop2 from A',
 		prop3: 'prop3 from A'
 	});
-	var a = new A;
 	
+	var a = new A;
 	log('A.prototype.constructor = ' + A.prototype.constructor + assert(A.prototype.constructor === A));
+	log('A.sf() returns: "' + A.sf() + '"' + assert(A.sf() === 'called A.sf()'));
 	log('a instanceof A = ' + (a instanceof A) + assert(a instanceof A));
 	log('a.prop1 = "' + a.prop1 + '"' + assert(a.prop1 === 'prop1 from A'));
 	log('a.prop2 = "' + a.prop2 + '"' + assert(a.prop2 === 'prop2 from A'));
@@ -31,16 +32,15 @@ wn.require('files.common', function() {
 	log.goUp();
 	
 	log('constructor function B() with property prop2 inheriting from A(); instance b').goDown();
-	function B() {
-		
-	}
+	function B() {}
+	wn.inherit(B, A);
 	wn.extend(B.prototype, {
 		prop2: 'prop2 from B'
 	});
-	wn.inherit(B, A);
 	var b = new B;
 	
 	log('B.prototype.constructor = ' + B.prototype.constructor + assert(B.prototype.constructor === B));
+	log('B.sf() returns: "' + B.sf() + '"' + assert(B.sf() === 'called A.sf()'));
 	log('b instanceof B = ' + (b instanceof B) + assert(b instanceof B));
 	log('b instanceof A = ' + (b instanceof A) + assert(b instanceof A));
 	log('b.prop1 = "' + b.prop1 + '"' + assert(b.prop1 == 'prop1 from A'));
@@ -49,17 +49,20 @@ wn.require('files.common', function() {
 	log('b.parent.prop2 = "' + b.parent.prop2 + '"' + assert(b.parent.prop2 === 'prop2 from A'));
 	log.goUp();
 	
-	log('constructor function C() with property prop3 inheriting from B(); instance c').goDown();
-	function C() {
-		
+	log('constructor function C() with property prop3 and static sf, inheriting from B(); instance c').goDown();
+	function C() {}
+	wn.inherit(C, B);
+	C.sf = function sf() {
+		return 'called C.sf()';
 	}
 	wn.extend(C.prototype, {
 		prop3: 'prop3 from C'
 	});
-	wn.inherit(C, B);
 	var c = new C;
 	
 	log('C.prototype.constructor = ' + C.prototype.constructor + assert(C.prototype.constructor === C));
+	log('C.sf() returns: "' + C.sf() + '"' + assert(C.sf() === 'called C.sf()'));
+	log('C.parent.sf() returns: "' + C.parent.sf() + '"' + assert(C.parent.sf() === 'called A.sf()'));
 	log('c instanceof C = ' + (c instanceof C) + assert(c instanceof C));
 	log('c instanceof B = ' + (c instanceof B) + assert(c instanceof B));
 	log('c instanceof A = ' + (c instanceof A) + assert(c instanceof A));
@@ -68,9 +71,11 @@ wn.require('files.common', function() {
 	log('c.prop3 = "' + c.prop3 + '"' + assert(c.prop3 == 'prop3 from C'));
 	log('c.parent.prop3 = "' + c.parent.prop3 + '"' + assert(c.parent.prop3 === 'prop3 from A'));
 	log.goUp();
+	
 
 	wn.require('files.jQuery', function() {
 		log('jQuery loaded').sub('colouring results');
 		$('#log > ul > li > ul > li:contains("[ok]")').addClass('complete');
+		$('#log > ul > li > ul > li:contains("[error]")').addClass('error');
 	});
 });
