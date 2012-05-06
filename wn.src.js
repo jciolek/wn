@@ -316,6 +316,11 @@
 				throw new TypeError('WN::ns(): nsStr parameter is expected to be a non-zero length String. ' + typeof nsStr + ': "' + nsStr + '" given.');
 			}
 			
+			// make sure there is '.' at the beginning of the namespace string 
+			if (nsStr.charAt(0) !== '.') {
+				nsStr = '.' + nsStr;
+			}
+			
 			// if called as a getter just search in the index
 			if (isGet) {
 				return nsObj[nsStr] || null;
