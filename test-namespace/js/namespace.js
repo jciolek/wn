@@ -5,7 +5,9 @@ wn.require('files.common', function() {
 	// preloading jQuery for later use, so far nothing depends on it
 	wn.require('files.jQuery');
 	
-	var log = wn('log');
+	var log = wn('log'),
+		nsList, ns;
+
 	function assert(condition) {
 		return condition ? ' [ok]' : ' [error]';
 	}
@@ -29,11 +31,45 @@ wn.require('files.common', function() {
 	setup('test', 'Test');
 	setup('nest', 'Really.Nested.Namespace');
 	setup('subtest', 'Test.name');
-	log('checking if object wn(\'Test\') hasn\'t been damaged');
-	log.sub('wn(\'Test\').name = "' + wn('Test').name + assert(wn('Test').name === 'test'));
-
 	
-
+	log
+		.goDown()
+		.log('checking if object wn(\'Test\') hasn\'t been damaged')
+		.sub('wn(\'Test\').name = "' + wn('Test').name + assert(wn('Test').name === 'test'))
+		.goUp();
+	
+	log('setting multiple child namespaces: Test.child1, Test.child2').goDown();
+	wn('Test.', {
+		child1: 'child 1 of Test',
+		child2: 'child 2 of Test'
+	});
+	log('wn(\'Test.child1\') = "' + wn('Test.child1') + '"' + assert(wn('Test.child1') === 'child 1 of Test'));
+	log('wn(\'Test.child2\') = "' + wn('Test.child2') + '"' + assert(wn('Test.child2') === 'child 2 of Test'));
+	log
+		.log('checking if object wn(\'Test\') hasn\'t been damaged')
+		.sub('wn(\'Test\').name = "' + wn('Test').name + assert(wn('Test').name === 'test'))
+	
+	log.goUp();
+	
+	log('accessing child namespaces of Test.').goDown();
+	nsList = {
+		checked: 0,
+		items: {
+			name: false,
+			child1: false,
+			child2: false
+		}
+	}
+	for (ns in wn('Test.')) {
+		if (!nsList.items[ns]) {
+			nsList.checked++;
+			nsList.items[ns] = true;
+		}
+		log(ns + ' = "' + wn('Test.' + ns) + '"' + assert(nsList.items[ns]));
+	}
+	log('child namespaces found: ' + nsList.checked + assert(nsList.checked === 3));
+	log.goUp();
+	
 	wn.require('files.jQuery', function() {
 		log('jQuery loaded').sub('colouring results');
 		
