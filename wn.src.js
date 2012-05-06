@@ -412,20 +412,14 @@
 				F.prototype = PPrototype;
 				C.prototype = new F();
 				// copy instance properties
-				for (i in CPrototype) {
-					if (CPrototype.hasOwnProperty(i)) {
-						C.prototype[i] = CPrototype[i];
-					}
-				}
+				this.extend(C.prototype, CPrototype);
+
 				C.prototype.constructor = C;
 				C.prototype.parent = PPrototype;
 				
 				// copy constructor properties
-				for (i in P) {
-					if (P.hasOwnProperty(i)) {
-						C[i] = P[i];
-					}
-				}
+				this.extend(C, P);
+
 				C.parent = P;
 			}
 		})()
