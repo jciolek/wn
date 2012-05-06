@@ -107,7 +107,8 @@
 			 */
 			ns2url: function(ns)
 			{
-				return this.urlPrefix + ns + this.urlSuffix;
+				// internally all namespaces start with '.'
+				return this.urlPrefix + ns.slice(1) + this.urlSuffix;
 			},
 			
 			/**
@@ -123,10 +124,15 @@
 			 */
 			addMapping: function(ns, url, noNs)
 			{
-				if (typeof ns !== 'string') {
-					throw new TypeError('WN::addMapping(): ns parameter is expected to be a string. ' + typeof ns + ' given.');
+				if (typeof ns !== 'string' || ns.length === 0 || ns === '.') {
+					throw new TypeError('WN::addMapping(): ns parameter is expected to be a non-zero length string. ' + typeof ns + ': "' + ns + '" + given.');
 				}
 				
+				// internally all namespaces start with '.'
+				if (ns.charAt(0) !== '.') {
+					ns = '.' + ns;
+				}
+
 				this.nsMapping[ns] = new RequestURL(url, noNs);
 			},
 			
@@ -270,13 +276,11 @@
 	
 			while (nsStr = nsArr.shift()) {
 				
-				// each of the required namespaces is supposed to be a string
-				if (typeof nsStr !== 'string' || nsStr.length == 0) {
-					throw new TypeError('WN::require(): namespace is expected to be a non-zero length String. ' + typeof nsStr + ': "' + nsStr + '" given.');
-				}
-				
 				// collect missing namespaces - might be null or undefined
-				if (this.nsObj[nsStr] == undefined) {
+				if (this.ns(nsStr) == undefined) {
+					if (nsStr.charAt(0) !== '.') {
+						nsStr = '.' + nsStr;
+					}
 					reqObj.add(nsStr);
 				}
 			}
@@ -323,7 +327,7 @@
 			
 			// if called as a getter just search in the index
 			if (isGet) {
-				return nsObj[nsStr] || null;
+				return nsObj[nsStr];
 			}
 			
 			// acting as a setter from this point onwards
