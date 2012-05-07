@@ -107,8 +107,10 @@
 			 */
 			ns2url: function(ns)
 			{
-				// internally all namespaces start with '.'
-				return this.urlPrefix + ns.replace(/^\./, '').replace(/\.$/, '_') + this.urlSuffix;
+				// internally all namespaces start with '.' - get rid of it
+				// namespace ending with '.' means parent - file should end with '_'
+				// namespace path reflects directory path so all remaining '.'s are replaced with '/'s
+				return this.urlPrefix + ns.replace(/^\./, '').replace(/\.$/, '_').replace(/\./, '/') + this.urlSuffix;
 			},
 			
 			/**

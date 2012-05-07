@@ -1,6 +1,6 @@
 wn.require('log', function() {
 	wn('log')
-		.log('Test.File2.js: loaded; require():')
+		.log('Test/File2.js: loaded; require():')
 		.sub('Test.File3', 'Test.File4.extra', 'Test.File5', 'Test.Parent.');
 	
 	wn.require([
@@ -11,7 +11,7 @@ wn.require('log', function() {
 		],
 		function() {
 			wn('log')
-				.log('Test.File2.js: require() complete')
+				.log('Test/File2.js: require() complete')
 				.sub(
 					wn('Test.File3'),
 					wn('Test.File4.extra'),
