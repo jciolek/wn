@@ -10,7 +10,7 @@ wn.require('log', function() {
 		function() {
 			wn('log')
 				.log('file3.js: require() complete')
-				.sub(wn.ns('Test.File4'), 'testing jQuery: ...');
+				.sub(wn('Test.File4'), 'testing jQuery: ...');
 	
 			wn('Test.File3', 'namespace "Test.File3" ok');
 		}

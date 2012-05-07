@@ -93,7 +93,7 @@
 		loader: {
 			required: {},
 			requested: {},
-			urlPrefix: '/',
+			urlPrefix: '/js/',
 			urlSuffix: '.js',
 			nsMapping: {},
 			
@@ -108,7 +108,7 @@
 			ns2url: function(ns)
 			{
 				// internally all namespaces start with '.'
-				return this.urlPrefix + ns.slice(1) + this.urlSuffix;
+				return this.urlPrefix + ns.replace(/^\./, '').replace(/\.$/, '_') + this.urlSuffix;
 			},
 			
 			/**
@@ -365,19 +365,21 @@
 							if (obj.hasOwnProperty(j)  && obj[j] != undefined) {
 								nsObj[nsCurr][j] = obj[j];
 								nsRootObj[nsCurrPath + j] = obj[j];
+								// notify the loader about new arrival for each child namespace
+								this.loader.notify(nsCurrPath + j);
 							}
 						}
 					// or simply set the leaf
 					} else {
 						nsRootObj[nsCurrPath] = nsObj[nsCurr] = obj;
 					}
+					// notify the loader about new arrival
+					// for a leaf or a parent node 
+					this.loader.notify(nsCurrPath);
 				}
 				
 				nsObj = nsObj[nsCurr];
 			}
-			
-			// notify the loader about new arrival
-			this.loader.notify(nsStr);
 	
 			return nsObj;
 		},
