@@ -391,6 +391,7 @@
 		 * 
 		 * @param {function} C - Child constructor function
 		 * @param {function|string} P - Parent constructor function or namespace for it
+		 * @param {boolean} copyStatic - Indicates whether constructor function properties should be copied as well
 		 * 
 		 * @description Preserves inheritance chain, therefore:
 		 * Child instanceof Parent == true
@@ -399,7 +400,9 @@
 		inherit: (function () {
 			var F = function () {};
 			
-			return function inherit(C, P) {
+			return function inherit(C, P, copyStatic) {
+				copyStatic = copyStatic || false;
+				
 				// parent can be also a namespace
 				if (typeof P === 'string') {
 					P = this.ns(P);
@@ -426,8 +429,10 @@
 				C.prototype.parent = PPrototype;
 				
 				// copy constructor properties
-				this.extend(C, P);
-
+				if (copyStatic) {
+					this.extend(C, P);
+				}
+	
 				C.parent = P;
 			}
 		})()

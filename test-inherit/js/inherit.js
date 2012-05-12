@@ -38,7 +38,7 @@ wn.require('files.common', function() {
 	log('constructor function B() with property prop2 inheriting from A()').goDown();
 	function B() {}
 	log('inheritance through namespace: wn.inherit(B, \'class.A\')');
-	wn.inherit(B, 'class.A');
+	wn.inherit(B, 'class.A', true);
 	wn.extend(B.prototype, {
 		prop2: 'prop2 from B'
 	});
