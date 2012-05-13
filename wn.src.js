@@ -4,7 +4,7 @@
  *
  * @author Jacek Ciolek <j.ciolek@webnicer.com>
  * @licence Copyright 2012, Jacek Ciolek
- * Dual licensed under the MIT or GPL Version 2 licenses.
+ * Dual licensed under the MIT or GPL Version 3 licenses.
  * http://bitbucket.org/jciolek/webnicer/wiki/Licence
  */
 
