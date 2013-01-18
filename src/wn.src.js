@@ -1,24 +1,42 @@
-/*!*
- * WebNicer (WN) JavaScript Library v1.0.0
+/**
+ * WebNicer (WN) JavaScript Library v1.0.2
  * http://bitbucket.org/jciolek/webnicer
  *
+ * @preserve
  * @author Jacek Ciolek <j.ciolek@webnicer.com>
- * @licence Copyright 2012, Jacek Ciolek
+ * @licence Copyright 2012-2013, Jacek Ciolek
  * Dual licensed under the MIT or GPL Version 3 licenses.
  * http://bitbucket.org/jciolek/webnicer/wiki/Licence
  */
 
-(function(){
+(function (global){
 	/**
 	 * Standalone, unobtrusive library which provides:
 	 * - module-style namespaces for organizing libraries, objects and values globally
 	 * - support for defining dependencies between namespaces and loading required files seamlessly
-	 * - support for full single inheritance of constructor functions
+	 * - support for classical single inheritance of constructor functions
 	 */
-	function Webnicer(ns, obj)
+	function Webnicer()
 	{
-		return Webnicer.ns(ns, obj)
+		var prop,
+			webnicer = function (ns, obj) {
+				return webnicer.ns(ns, obj);
+			};
+			
+			// populate all the properties
+			for (prop in Webnicer) {
+				if (Webnicer.hasOwnProperty(prop)) {
+					webnicer[prop] = Webnicer[prop];
+				}
+			}
+
+			// fill in the gaps - instance specific
+			webnicer.nsObj = {};
+			webnicer.loader = new Loader();
+		
+		return webnicer;
 	}
+	
 	/**
 	 * Extends objects with other objects - deep or shallow, in- or excluding properties from prototype.
 	 * 
@@ -82,180 +100,18 @@
 	
 	// now the method is in place, extend own prototype
 	Webnicer.extend(Webnicer, {
-		nsObj: {},
-
-		/**
-		 * Takes care of loading requested scripts and notifying interested parties.
-		 * 
-		 * @description Can notify on script load or when required namespace has been set.
-		 * @see methods notify() and addMapping()
-		 */
-		loader: {
-			required: {},
-			requested: {},
-			urlPrefix: '/js/',
-			urlSuffix: '.js',
-			nsMapping: {},
-			
-			/**
-			 * Converts a namespace into a url
-			 * 
-			 * @param {string} ns - The namespace to be converted into a url.
-			 * @returns {string} - The resulting url.
-			 * 
-			 * @description This method can be easily replaced in order to provide environment specific and more sophisticated conversion.
-			 */
-			ns2url: function(ns)
-			{
-				// internally all namespaces start with '.' - get rid of it
-				// namespace ending with '.' means parent - file should end with '_'
-				// namespace path reflects directory path so all remaining '.'s are replaced with '/'s
-				return this.urlPrefix + ns.replace(/^\./, '').replace(/\.$/, '_').replace(/\./g, '/') + this.urlSuffix;
-			},
-			
-			/**
-			 * Adds custom ns -> url mapping which does not follow general rules implemented by ns2url().
-			 * 
-			 * @param {string} ns - The namespace to be mapped.
-			 * @param {string} url - The url to be mapped onto.
-			 * @param {boolean} noNS - Indicates whether the requested script does not set required namespace.
-			 * 
-			 * @description Allows for adding files which do not follow gerneal location pattern
-			 * or do not set namespaces.
-			 * @see method ns2url()
-			 */
-			addMapping: function(ns, url, noNs)
-			{
-				if (typeof ns !== 'string' || ns.length === 0 || ns === '.') {
-					throw new TypeError('WN::addMapping(): ns parameter is expected to be a non-zero length string. ' + typeof ns + ': "' + ns + '" + given.');
-				}
-				
-				// internally all namespaces start with '.'
-				if (ns.charAt(0) !== '.') {
-					ns = '.' + ns;
-				}
-
-				this.nsMapping[ns] = new RequestURL(url, noNs);
-			},
-			
-			/**
-			 * Request namespaces from given Request object to be loaded.
-			 * 
-			 * @param {object} reqObj - Request object containing required namespaces.
-			 * @return {boolean} - true if the request could be finished, false otherwise.
-			 * 
-			 * @description Converts namespaces to urls and request all files that has not been already loaded.
-			 * @see method Request::finish()
-			 */
-			request: function(reqObj)
-			{
-				var _this = this,
-					scriptNode,
-					scriptNodeFirst,
-					nsObj = reqObj.nsObj,
-					ns,
-					urlObj,
-					url,
-					onloadHandler;
-				
-				for (ns in nsObj) {
-					urlObj = this.nsMapping[ns] || new RequestURL(this.ns2url(ns));
-					url = urlObj.url;
-					
-					// cater for non-namespace requests
-					// if the url corresponding with the current namespace has been loaded remove the namespace from the request object
-					if (this.requested[url] === true) {
-						reqObj.del(ns);
-						continue;
-					}
-					
-					// add request object to the notification list
-					if (this.required[ns] === undefined) {
-						this.required[ns] = [];
-					}
-					this.required[ns].push(reqObj);
-	
-					// request include file if not requested before
-					if (this.requested[url] === undefined) {
-						this.requested[url] = false;
-						
-						scriptNode = document.createElement('script');
-						scriptNode.type = 'text/javascript';
-						scriptNode.src = url;
-						scriptNode.async = true;
-						// provide support for scripts which do not set any namespaces
-						if (urlObj.noNs) {
-							scriptNode.onload = (function() {
-								var _ns = ns,
-									_url = url;
+		// has to be filled in by the constructor
+		nsObj: null,
+		loader: null,
 		
-								return function(e) {
-									_this.requested[_url] = true;
-									_this.notify.call(_this, _ns);
-								}
-							})();
-							// one browser needs special treatment - have a guess
-							scriptNode.onreadystatechange = (function() {
-								var _scriptNode = scriptNode;
-									_onloadHandler = onloadHandler;
-								
-								return function() {
-									if (_scriptNode.readyState === 'loaded' || _scriptNode.readyState === 'complete') {
-										_scriptNode.onreadystatechange = null;
-										_scriptNode.onload();
-									}
-								}
-							})();
-						}
-						scriptNodeFirst = document.getElementsByTagName('script')[0];
-						scriptNodeFirst.parentNode.insertBefore(scriptNode, scriptNodeFirst);
-					}
-				}
-				
-				// if requested only loaded files then there is nothing to wait for
-				// otherwise notify() will pick up
-				return reqObj.finish();
-			},
-			
-			/**
-			 * Notifies all Request objects in the collection about new namespace arrival.
-			 * 
-			 * @param {string} newNs - The new namespace.
-			 * 
-			 * @description Attempts to finish all Requests for the given namespace.
-			 */
-			notify: function(newNs)
-			{
-				var reqArr,
-					reqObj;
-				
-				// anyone interested in the new namespace?
-				reqArr = this.required[newNs];
-				if (reqArr !== undefined) {
-					
-					// go through all request objects subsribed to the current namespace
-					while (reqObj = reqArr.shift()) {
-					
-						// remove new namespace from the wish list
-						reqObj.del(newNs);
-						
-						// try to finish the current request
-						reqObj.finish();
-					}
-					
-					// everyone notified, list no longer useful
-					delete this.required[newNs];
-				}
-			}
-		},
-		
+		sandbox: Webnicer,
 		/**
 		 * Requires the presence of given namespaces. Optionally sets callback to be called when all required namespaces are present.
 		 * 
 		 * @param {array} nsArr - Array of required namespaces
 		 * @param {function} [callback] - (optional) Function to be called when all required namespaces are present.
 		 */
-		require: function require(nsArr, callback)
+		require: function (nsArr, callback)
 		{
 			var reqObj = new Request(callback),
 				nsStr;
@@ -303,7 +159,7 @@
 		 * If the second parameter is not defined function acts as a getter.
 		 * Allows for setting leaf and parent nodes with the same name as an aid to inheritance, e.g. 'User' and 'User.Admin'
 		 */
-		ns: function ns(nsStr, obj)
+		ns: function (nsStr, obj)
 		{		
 			var nsArr = [],
 				l = 0,
@@ -400,7 +256,7 @@
 		inherit: (function () {
 			var F = function () {};
 			
-			return function inherit(C, P, copyStatic) {
+			return function (C, P, copyStatic) {
 				copyStatic = copyStatic || false;
 				
 				// parent can be also a namespace
@@ -417,8 +273,7 @@
 				}
 				
 				var PPrototype = P.prototype,
-					CPrototype = C.prototype,
-					i;
+					CPrototype = C.prototype;
 				
 				F.prototype = PPrototype;
 				C.prototype = new F();
@@ -440,6 +295,176 @@
 
 
 	/**
+	 * Takes care of loading requested scripts and notifying interested parties.
+	 * 
+	 * @description Can notify on script load or when required namespace has been set.
+	 * @see methods notify() and addMapping()
+	 */
+	function Loader()
+	{
+		this.required = {};
+		this.requested = {};
+		this.nsMapping = {};
+	}
+	
+	Webnicer.extend(Loader.prototype, {
+//		required: null,
+//		requested: null,
+		urlPrefix: '/js/',
+		urlSuffix: '.js',
+//		nsMapping: null,
+		
+		/**
+		 * Converts a namespace into a url
+		 * 
+		 * @param {string} ns - The namespace to be converted into a url.
+		 * @returns {string} - The resulting url.
+		 * 
+		 * @description This method can be easily replaced in order to provide environment specific and more sophisticated conversion.
+		 */
+		ns2url: function(ns)
+		{
+			// internally all namespaces start with '.' - get rid of it
+			// namespace ending with '.' means parent - file should end with '_'
+			// namespace path reflects directory path so all remaining '.'s are replaced with '/'s
+			return this.urlPrefix + ns.replace(/^\./, '').replace(/\.$/, '_').replace(/\./g, '/') + this.urlSuffix;
+		},
+		
+		/**
+		 * Adds custom ns -> url mapping which does not follow general rules implemented by ns2url().
+		 * 
+		 * @param {string} ns - The namespace to be mapped.
+		 * @param {string} url - The url to be mapped onto.
+		 * @param {boolean} noNS - Indicates whether the requested script does not set required namespace.
+		 * 
+		 * @description Allows for adding files which do not follow gerneal location pattern
+		 * or do not set namespaces.
+		 * @see method ns2url()
+		 */
+		addMapping: function(ns, url, noNs)
+		{
+			if (typeof ns !== 'string' || ns.length === 0 || ns === '.') {
+				throw new TypeError('WN::addMapping(): ns parameter is expected to be a non-zero length string. ' + typeof ns + ': "' + ns + '" + given.');
+			}
+			
+			// internally all namespaces start with '.'
+			if (ns.charAt(0) !== '.') {
+				ns = '.' + ns;
+			}
+
+			this.nsMapping[ns] = new RequestURL(url, noNs);
+		},
+		
+		/**
+		 * Request namespaces from given Request object to be loaded.
+		 * 
+		 * @param {object} reqObj - Request object containing required namespaces.
+		 * @return {boolean} - true if the request could be finished, false otherwise.
+		 * 
+		 * @description Converts namespaces to urls and request all files that has not been already loaded.
+		 * @see method Request::finish()
+		 */
+		request: function(reqObj)
+		{
+			var _this = this,
+				scriptNode,
+				scriptNodeFirst,
+				nsObj = reqObj.nsObj,
+				ns,
+				urlObj,
+				url;
+			
+			for (ns in nsObj) {
+				urlObj = this.nsMapping[ns] || new RequestURL(this.ns2url(ns));
+				url = urlObj.url;
+				
+				// cater for non-namespace requests
+				// if the url corresponding with the current namespace has been loaded remove the namespace from the request object
+				if (this.requested[url] === true) {
+					reqObj.del(ns);
+					continue;
+				}
+				
+				// add request object to the notification list
+				if (this.required[ns] === undefined) {
+					this.required[ns] = [];
+				}
+				this.required[ns].push(reqObj);
+
+				// request include file if not requested before
+				if (this.requested[url] === undefined) {
+					this.requested[url] = false;
+					
+					scriptNode = document.createElement('script');
+					scriptNode.type = 'text/javascript';
+					scriptNode.src = url;
+					scriptNode.async = true;
+					// provide support for scripts which do not set any namespaces
+					if (urlObj.noNs) {
+						scriptNode.onload = (function() {
+							var _ns = ns,
+								_url = url;
+	
+							return function(e) {
+								_this.requested[_url] = true;
+								_this.notify.call(_this, _ns);
+							}
+						})();
+						// one browser needs special treatment - have a guess
+						scriptNode.onreadystatechange = (function() {
+							var _scriptNode = scriptNode;
+							
+							return function() {
+								if (_scriptNode.readyState === 'loaded' || _scriptNode.readyState === 'complete') {
+									_scriptNode.onreadystatechange = null;
+									_scriptNode.onload();
+								}
+							}
+						})();
+					}
+					scriptNodeFirst = document.getElementsByTagName('script')[0];
+					scriptNodeFirst.parentNode.insertBefore(scriptNode, scriptNodeFirst);
+				}
+			}
+			
+			// if requested only loaded files then there is nothing to wait for
+			// otherwise notify() will pick up
+			return reqObj.finish();
+		},
+		
+		/**
+		 * Notifies all Request objects in the collection about new namespace arrival.
+		 * 
+		 * @param {string} newNs - The new namespace.
+		 * 
+		 * @description Attempts to finish all Requests for the given namespace.
+		 */
+		notify: function(newNs)
+		{
+			var reqArr,
+				reqObj;
+			
+			// anyone interested in the new namespace?
+			reqArr = this.required[newNs];
+			if (reqArr !== undefined) {
+				
+				// go through all request objects subsribed to the current namespace
+				while (reqObj = reqArr.shift()) {
+				
+					// remove new namespace from the wish list
+					reqObj.del(newNs);
+					
+					// try to finish the current request
+					reqObj.finish();
+				}
+				
+				// everyone notified, list no longer useful
+				delete this.required[newNs];
+			}
+		}		
+	});
+
+	/**
 	 * Represents URL to be requested
 	 * 
 	 * @constructor
@@ -452,14 +477,9 @@
 			throw new TypeError('RequestURL(): url parameter is expected to be a non-zero length string. ' + typeof url + ': "' + url + '" given.');
 		}
 		
-		this.url = url;
+		this.url = url || '';
 		this.noNs = Boolean(noNs || false);
 	}
-	Webnicer.extend(RequestURL.prototype, {
-		url: '',
-		noNs: false
-	});
-
 	
 	/**
 	 * Represents a request for multiple namespaces
@@ -471,6 +491,7 @@
 		this.nsObj = {};
 		this.callback = callback;
 	}
+	
 	Webnicer.extend(Request.prototype, {
 		nsObj: null,
 		callback: null,
@@ -545,5 +566,6 @@
 	});
 
 	// add wn to the global namespace
-	window.wn = Webnicer;
-})();
+	global.wn = Webnicer.sandbox();
+	
+})(window);
