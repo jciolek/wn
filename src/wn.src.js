@@ -1,4 +1,4 @@
-/**
+/*!*
  * WebNicer (WN) JavaScript Library v1.0.2
  * http://bitbucket.org/jciolek/webnicer
  *
