@@ -1,5 +1,5 @@
 /*!*
- * WebNicer (WN) JavaScript Library v1.0.3
+ * WebNicer (WN) JavaScript Library v1.0.4
  * http://bitbucket.org/jciolek/webnicer
  *
  * @preserve
@@ -42,16 +42,18 @@
 	 * 
 	 * @param {Object} child - Object to be extended (extendee)
 	 * @param {Object} parent - Object extending the child (extender)
-	 * @param {Boolean} [deep] - (optional) Indicates deep extension, false by default
-	 * @param {Boolean} [proto] - (optional) Indicates if properties from prototype should be considered as well
+	 * @param {Boolean} [deep] - (optional) deep extension, false by default
+	 * @param {Boolean} [overwrite] - (optional) overwrite objects by parent's clones in deep, false by default
 	 * 
 	 * @description Modifies provided child. Works on pairs of any object, even a function and an array.
+	 * However function always overwrites an object, even in deep extention.
 	 * Always overwrites primitives with objects and vice versa.
+	 * This function has no internal dependecies, can be easily borrowed.
 	 */
-	Webnicer.extend = function extend(child, parent, deep, proto)
+	Webnicer.extend = function extend(child, parent, deep, overwrite)
 	{
 		var deep = deep || false,
-			proto = proto || false,
+			overwrite = overwrite || false,
 			cType = typeof child,
 			pType = typeof parent,
 			allowedTypes = {
@@ -71,25 +73,28 @@
 		}
 		
 		for (i in parent) {
-			if (proto || parent.hasOwnProperty(i)) {
+			if (parent.hasOwnProperty(i)) {
 				p = parent[i];
 				c = child[i];
 				
-				// shallow copy 
+				// shallow copy
+				// always overwrite when parent's property is null or not an object
 				if (!deep || p === null || typeof p !== 'object') {
 					child[i] = p;
 					continue;
 				}
 				
 				// deep copy
-				
-				// initialize compatible type
-				// WARNING! It does not work with some built-in constructors, e.g. Date()
-				F.prototype = p.constructor.prototype;
-				c = new F();
+				// 
+				if (overwrite || !(typeof c in allowedTypes)) {
+					// initialize compatible type
+					// WARNING! instances of some built-in constructors made this way may not work, e.g. Date()
+					F.prototype = p.constructor.prototype;
+					c = new F();
+				}
 	
 				// extend child's property
-				child[i] = extend(c, p, deep, proto);
+				child[i] = extend(c, p, deep, overwrite);
 			}
 		}
 		return child;
