@@ -137,7 +137,7 @@ describe('Extend', function () {
 		expect(c.becomeBoolean).toBe(true);
 	});
 	
-	it('should be able to overwrite objects with cloned objects', function () {
+	it('should be able to overwrite objects with cloned objects (in deep)', function () {
 		var p = { object: { name: 'parent', parentOnly: true }, },
 			c = { object: { name: 'child', childOnly: true} };
 			
