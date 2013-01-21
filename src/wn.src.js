@@ -1,5 +1,5 @@
 /*!*
- * WebNicer (WN) JavaScript Library v1.0.2
+ * WebNicer (WN) JavaScript Library v1.0.3
  * http://bitbucket.org/jciolek/webnicer
  *
  * @preserve
@@ -55,10 +55,20 @@
 			proto = proto || false,
 			cType = typeof child,
 			pType = typeof parent,
+			allowedTypes = {
+				'object': true,
+				'function': true
+			},
+			F = function () {},
 			i, p, c;
 		
-		if ((pType !== 'object' && pType !== 'function') || (cType !== 'object' && cType !== 'function')) {
+		// check input parameters
+		if (!(pType in allowedTypes && cType in allowedTypes)) {
 			throw new TypeError('WN::extend(): Type mismatch. Trying to extend ' + cType + ' with ' + pType + '.');
+		}
+		
+		if (child === null || parent === null) {
+			throw new TypeError('WN::extend(): child and parent cannot be null.');
 		}
 		
 		for (i in parent) {
@@ -67,32 +77,20 @@
 				c = child[i];
 				
 				// shallow copy 
-				if (!deep) {
-					if (p !== undefined || c === null) {
-						child[i] = p;
-					}
+				if (!deep || p === null || typeof p !== 'object') {
+					child[i] = p;
 					continue;
 				}
 				
 				// deep copy
-				if (typeof p == 'object') {
-					if (p !== null) {
-						// initialize compatible type if child's property is not an object
-						if (typeof c != 'object') {
-							c = (p instanceof Array) ? [] : {};
-						}
-						// extend child's property
-						child[i] = extend(c, p, deep, proto);
-					// make sure types of empty properties match
-					} else if (c === undefined) {
-						child[i] = null;
-					}
-				} else {
-					// make sure that types match even on empty properties
-					if (p !== undefined || c === null) {
-						child[i] = p;
-					}
-				}
+				
+				// initialize compatible type
+				// WARNING! It does not work with some built-in constructors, e.g. Date()
+				F.prototype = p.constructor.prototype;
+				c = new F();
+	
+				// extend child's property
+				child[i] = extend(c, p, deep, proto);
 			}
 		}
 		return child;
