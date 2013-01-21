@@ -24,11 +24,7 @@
 			};
 			
 			// populate all the properties
-			for (prop in Webnicer) {
-				if (Webnicer.hasOwnProperty(prop)) {
-					webnicer[prop] = Webnicer[prop];
-				}
-			}
+			Webnicer.extend(webnicer, Webnicer);
 
 			// fill in the gaps - instance specific
 			webnicer.nsObj = {};
@@ -78,19 +74,31 @@
 				c = child[i];
 				
 				// shallow copy
-				// always overwrite when parent's property is null or not an object
-				if (!deep || p === null || typeof p !== 'object') {
+				// always overwrite when parent's property is null, not an object
+				// or a function where the child's property is not a function
+				if (!deep || p === null || !(typeof p in allowedTypes)) {
 					child[i] = p;
 					continue;
 				}
 				
 				// deep copy
-				// 
 				if (overwrite || !(typeof c in allowedTypes)) {
-					// initialize compatible type
-					// WARNING! instances of some built-in constructors made this way may not work, e.g. Date()
-					F.prototype = p.constructor.prototype;
-					c = new F();
+					if (typeof p === 'function') {
+						c = (function () {
+							var _p = p.__wnCloneOf || p,
+								fn = function () {
+									return _p.apply(this, arguments);
+								};
+								
+							fn.__wnCloneOf = _p;
+							return fn;
+						})();
+					} else {
+						// initialize compatible type
+						// WARNING! instances of some built-in constructors made this way may not work, e.g. Date()
+						F.prototype = p.constructor.prototype;
+						c = new F();
+					}
 				}
 	
 				// extend child's property

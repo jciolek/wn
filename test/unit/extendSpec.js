@@ -72,7 +72,7 @@ describe('Extend', function () {
 		expect(c.object.deep).toEqual(p.object.deep);
 	});
 	
-	it('by default should extend objects with objects (in deep)', function () {
+	it('by default should extend an object with an object (in deep)', function () {
 		var p = { object: { name: 'parent', deep: { street: 'High'} } },
 			c = { object: { age: 12, deep: { town: 'London' } } };
 		
@@ -86,7 +86,7 @@ describe('Extend', function () {
 		expect(c.object.deep.street).toBe('High');
 	});
 	
-	it('by default should extend functions with objects (in deep)', function () {
+	it('by default should extend a function with an object (in deep)', function () {
 		var p = { prop: { age: 12 } },
 			c = { prop: function () {} };
 		
@@ -98,17 +98,77 @@ describe('Extend', function () {
 		expect(c.prop.age).toBe(12);
 	});
 	
-	it('should overwrite objects with functions (in deep)', function () {
-		var fn = function () {},
-			p = { prop: fn },
-			c = { prop: {} };
+	it('by default should extend a function with a function (in deep)', function () {
+		var fnP = function () {},
+			fnC = function () {},
+			p = { fn: fnP },
+			c = { fn: fnC };
+		
+		fnP.prop = 'parent';
+		fnC.another = 'child';
 		
 		wn.extend(c, p, true);
 		
-		expect(c.fn).toBe(p.fn);
+		expect(c.fn).toBe(fnC);
+		expect(c.fn.prop).toBe('parent');
+		expect(c.fn.another).toBe('child');
 	});
+	
+	it('by default should extend an object with a function (in deep)', function () {
+		var	p = { prop: function () {} },
+			c = { prop: { age: 12 } };
+		
+		p.prop.town = 'London';
+		wn.extend(c, p, true);
+		
+		expect(typeof c.prop).toBe('object');
+		expect(c.prop).not.toBe(p.prop);
+		expect(c.prop.town).toBe('London');
+		expect(c.prop.age).toBe(12);
+	});
+	
+	it('should clone a function preserving its functionality (in deep)', function () {
+		var p = {
+				fn: function (s) {
+					this.value = s;
+					return s;
+				}
+			},
+			c = {};
+		
+		p.fn.prop = { town: 'London' };	
+		wn.extend(c, p, true);
+		
+		expect(typeof c.fn).toBe('function');
+		expect(c.fn).not.toBe(p.fn);
+		expect(c.fn.prop).not.toBe(p.fn.prop);
+		expect(c.fn.prop).toEqual(p.fn.prop);
+		expect(c.fn('hello')).toBe('hello');
+		expect(c.value).toBe('hello');
+	});
+	
+	it('should clone always the same base function (in deep)', function () {
+		var p = {
+				fn: function (s) {
+					this.value = s;
+				}
+			},
+			c = {},
+			g = {};
+			
+		wn.extend(c, p, true);
+		wn.extend(g, c, true);
+		
+		expect(typeof g.fn).toBe('function');
+		expect(g.fn.__wnCloneOf).toBe(p.fn);
 
-	it('should clone object with their respective prototype (in deep)', function () {
+		g.fn('hello');
+		expect(g.value).toBe('hello');
+		expect(c.value).toBeUndefined();
+		expect(p.value).toBeUndefined();
+	});
+	
+	it('should clone an object with its respective prototype (in deep)', function () {
 		var O = function () {},
 			p = { array: [1, 'a', true], object: new O() },
 			c = {};
@@ -124,9 +184,10 @@ describe('Extend', function () {
 		expect(c.object instanceof O).toBeTruthy();
 	});
 	
-	it('should overwrite objects with primitives (in deep)', function () {
+	it('should overwrite an object or a function with a primitive (in deep)', function () {
 		var p = {becomeString: 'string', becomeNull: null, becomeUndefined: undefined, becomeBoolean: true},
-			c;
+			c,
+			fn = function () {};
 			
 		c = {becomeString: {}, becomeNull: {}, becomeUndefined: {}, becomeBoolean: {} };
 		wn.extend(c, p);
@@ -135,15 +196,29 @@ describe('Extend', function () {
 		expect(c.becomeNull).toBe(null);
 		expect(c.becomeUndefined).toBeUndefined();
 		expect(c.becomeBoolean).toBe(true);
+
+		c = {becomeString: fn, becomeNull: fn, becomeUndefined: fn, becomeBoolean: fn };
+		wn.extend(c, p);
+		
+		expect(c.becomeString).toBe('string');
+		expect(c.becomeNull).toBe(null);
+		expect(c.becomeUndefined).toBeUndefined();
+		expect(c.becomeBoolean).toBe(true);
 	});
 	
-	it('should be able to overwrite objects with cloned objects (in deep)', function () {
-		var p = { object: { name: 'parent', parentOnly: true }, },
-			c = { object: { name: 'child', childOnly: true} };
-			
+	it('should be able to overwrite an object or a function instead of extending (in deep)', function () {
+		var fn = function () { return 'child'; },
+			p = { object: { parentOnly: true }, fn: function (s) { return s; } },
+			c = { object: { childOnly: true}, fn: fn };
+		
+		fn.prop = 'hello';
 		wn.extend(c, p, true, true);
 		
 		expect(c.object).not.toBe(p.object);
 		expect(c.object).toEqual(p.object);
+		
+		expect(c.fn).not.toBe(p.fn);
+		expect(c.fn('parent')).toBe('parent');
+		expect(c.fn.prop).toBeUndefined();
 	});
 });
