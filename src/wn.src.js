@@ -47,7 +47,6 @@
 	 * 
 	 * @description Modifies provided child. Works on pairs of any object, even a function and an array.
 	 * Always overwrites primitives with objects and vice versa.
-	 * Does not remove child's property if parent's counterpart is undefined or null. 
 	 */
 	Webnicer.extend = function extend(child, parent, deep, proto)
 	{

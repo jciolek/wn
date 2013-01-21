@@ -92,28 +92,4 @@ describe('Extend', function () {
 			expect(c.becomeUndefined).toBeUndefined();
 			expect(c.onlyChild).toBe('intact');
 	});
-
-	it('', function () {
-		
-	});
-
-	it('', function () {
-		
-	});
-
-	it('', function () {
-		
-	});
-
-	it('', function () {
-		
-	});
-
-	it('', function () {
-		
-	});
-
-	it('', function () {
-		
-	});
 });
