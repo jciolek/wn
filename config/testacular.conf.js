@@ -3,14 +3,14 @@
 
 
 // base path, that will be used to resolve files and exclude
-basePath = '';
+basePath = '../';
 
 
 // list of files / patterns to load in the browser
 files = [
   JASMINE,
   JASMINE_ADAPTER,
-  'src/*.js',
+  'wn.js',
   'test/unit/*.js'
 ];
 
@@ -27,7 +27,7 @@ reporters = ['progress'];
 
 
 // web server port
-port = 8089;
+port = 8000;
 
 
 // cli runner port
@@ -59,7 +59,7 @@ browsers = ['Chrome'];
 
 
 // If browser does not capture in given timeout [ms], kill it
-captureTimeout = 10000;
+captureTimeout = 30000;
 
 
 // Continuous Integration mode
