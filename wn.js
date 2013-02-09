@@ -10,6 +10,9 @@
  */
 
 (function (global){
+	var _wn = global.wn,
+		wn;
+	
 	/**
 	 * Standalone, unobtrusive library which provides:
 	 * - module-style namespaces for organizing libraries, objects and values globally
@@ -18,8 +21,7 @@
 	 */
 	function Webnicer()
 	{
-		var prop,
-			webnicer = function (ns, obj) {
+		var webnicer = function (ns, obj) {
 				return webnicer.ns(ns, obj);
 			};
 			
@@ -582,7 +584,13 @@
 		}
 	});
 
+	wn = Webnicer.sandbox();
+	wn.noConflict = function () {
+		global.wn = _wn;
+		return wn;
+	}
+	
 	// add wn to the global namespace
-	global.wn = Webnicer.sandbox();
+	global.wn = wn;
 	
 })(window);

@@ -1,6 +1,6 @@
 'use strict';
 
-describe('Sandbox', function () {
+describe('Sandboxed wn', function () {
 	var swn;
 	
 	beforeEach(function () {
@@ -12,10 +12,10 @@ describe('Sandbox', function () {
 		expect(swn).not.toBe(wn);
 	});
 	
-	it('should have same static methods as wn', function () {
+	it('should have same static methods as wn.sandbox', function () {
 		var sm;
 		
-		for (sm in wn) {
+		for (sm in wn.sandbox) {
 			if (wn.hasOwnProperty(sm) && typeof wn[sm] === 'function') {
 				expect(swn[sm]).toBe(wn[sm]);
 			}
