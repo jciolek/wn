@@ -97,8 +97,13 @@
 					} else {
 						// initialize compatible type
 						// WARNING! instances of some built-in constructors made this way may not work, e.g. Date()
-						F.prototype = p.constructor.prototype;
-						c = new F();
+						// if the constructor requires parameters it won't work either
+						try {
+							c = new p.constructor();
+						} catch (e) {
+							F.prototype = p.constructor.prototype;
+							c = new F();
+						}
 					}
 				}
 	

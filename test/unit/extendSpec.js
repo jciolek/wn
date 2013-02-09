@@ -168,20 +168,37 @@ describe('Extend', function () {
 		expect(p.value).toBeUndefined();
 	});
 	
-	it('should clone an object with its respective prototype (in deep)', function () {
-		var O = function () {},
+	it('should clone an object using its respective constructor (in deep)', function () {
+		var O = function () { this.prop = 'value'; },
 			p = { array: [1, 'a', true], object: new O() },
 			c = {};
 		
 		wn.extend(c, p, true);
 		
 		expect(c.array).not.toBe(p.array);
-		expect(c.array).toEqual(p.array);
 		expect(c.array instanceof Array).toBeTruthy();
+		expect(c.array).toEqual(p.array);
 		
 		expect(c.object).not.toBe(p.object);
-		expect(c.object).toEqual(p.object);
 		expect(c.object instanceof O).toBeTruthy();
+		expect(c.object).toEqual(p.object);
+	});
+	
+	it('should try and borrow prototype for cloning if constructor requires parameters (in deep)', function () {
+		var O = function (p) {
+				if (p === undefined) {
+					throw 'Error';
+				}
+				this.p  = p;
+			},
+			p = { object: new O('alfa') },
+			c = {};
+		
+		wn.extend(c, p, true);
+		
+		expect(c.object).not.toBe(p.object);
+		expect(c.object instanceof O).toBeTruthy();
+		expect(c.object).toEqual(p.object);
 	});
 	
 	it('should overwrite an object or a function with a primitive (in deep)', function () {
