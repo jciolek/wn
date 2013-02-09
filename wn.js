@@ -48,9 +48,6 @@
 	 */
 	Webnicer.extend = function extend(child, parent, deep, overwrite)
 	{
-		deep = deep || false;
-		overwrite = overwrite || false;
-		
 		var	cType = typeof child,
 			pType = typeof parent,
 			allowedTypes = {
@@ -59,6 +56,9 @@
 			},
 			F = function () {},
 			i, p, c;
+		
+		deep = deep || false;
+		overwrite = overwrite || false;
 		
 		// check input parameters
 		if (!(pType in allowedTypes && cType in allowedTypes)) {
@@ -98,6 +98,7 @@
 						// initialize compatible type
 						// WARNING! instances of some built-in constructors made this way may not work, e.g. Date()
 						// if the constructor requires parameters it won't work either
+						// unless the properties are public
 						try {
 							c = new p.constructor();
 						} catch (e) {
