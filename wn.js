@@ -48,9 +48,10 @@
 	 */
 	Webnicer.extend = function extend(child, parent, deep, overwrite)
 	{
-		var deep = deep || false,
-			overwrite = overwrite || false,
-			cType = typeof child,
+		deep = deep || false;
+		overwrite = overwrite || false;
+		
+		var	cType = typeof child,
 			pType = typeof parent,
 			allowedTypes = {
 				'object': true,
@@ -89,7 +90,7 @@
 								fn = function () {
 									return _p.apply(this, arguments);
 								};
-								
+
 							fn.__wnCloneOf = _p;
 							return fn;
 						})();
@@ -106,7 +107,7 @@
 			}
 		}
 		return child;
-	}
+	};
 	
 	// now the method is in place, extend own prototype
 	Webnicer.extend(Webnicer, {
@@ -184,7 +185,7 @@
 				nsCurrPath = '';
 	
 			// don't accept rubbish parameters
-			if (typeof nsStr != 'string' || nsStr.length == 0) {
+			if (typeof nsStr != 'string' || nsStr.length === 0) {
 				throw new TypeError('WN::ns(): nsStr parameter is expected to be a non-zero length String. ' + typeof nsStr + ': "' + nsStr + '" given.');
 			}
 			
@@ -230,7 +231,7 @@
 					if (!isLeaf) {
 						for (j in obj) {
 							// TODO: re-index if the object defines ns parent nodes
-							if (obj.hasOwnProperty(j)  && obj[j] != undefined) {
+							if (obj.hasOwnProperty(j)  && obj[j] !== undefined) {
 								nsObj[nsCurr][j] = obj[j];
 								nsRootObj[nsCurrPath + j] = obj[j];
 								// notify the loader about new arrival for each child namespace
@@ -299,7 +300,7 @@
 				}
 	
 				C.parent = P;
-			}
+			};
 		})()
 	});
 
@@ -418,7 +419,7 @@
 							return function(e) {
 								_this.requested[_url] = true;
 								_this.notify.call(_this, _ns);
-							}
+							};
 						})();
 						// one browser needs special treatment - have a guess
 						scriptNode.onreadystatechange = (function() {
@@ -429,7 +430,7 @@
 									_scriptNode.onreadystatechange = null;
 									_scriptNode.onload();
 								}
-							}
+							};
 						})();
 					}
 					scriptNodeFirst = document.getElementsByTagName('script')[0];
@@ -483,7 +484,7 @@
 	 */
 	function RequestURL(url, noNs)
 	{
-		if (typeof url !== 'string' || url.length == 0) {
+		if (typeof url !== 'string' || url.length === 0) {
 			throw new TypeError('RequestURL(): url parameter is expected to be a non-zero length string. ' + typeof url + ': "' + url + '" given.');
 		}
 		
@@ -563,7 +564,7 @@
 		finish: function()
 		{
 			// run callback only if not finished before and there all requests are satisfied
-			if (!this.finished && this.length == 0) {
+			if (!this.finished && this.length === 0) {
 				if (typeof this.callback === 'function') {
 					// don't block the execution thread, callbacks may be heavy
 					setTimeout(this.callback, 0);
