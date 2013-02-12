@@ -125,7 +125,8 @@
 		
 		sandbox: Webnicer,
 		/**
-		 * Requires the presence of given namespaces. Optionally sets callback to be called when all required namespaces are present.
+		 * Requires the presence of given namespaces.
+		 * Optionally sets callback to be called when all required namespaces are present.
 		 * 
 		 * @param {array} nsArr - Array of required namespaces
 		 * @param {function} [callback] - (optional) Function to be called when all required namespaces are present.
