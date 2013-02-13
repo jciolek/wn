@@ -7,7 +7,7 @@ describe('Namespace', function () {
 		swn = wn.sandbox();
 	});
 	
-	it('should return the value stored, any type', function () {
+	it('should return stored value, any type', function () {
 		var obj = { text: 'hello' },
 			fn = function () { return 'hello'; };
 
