@@ -263,7 +263,7 @@
 		},
 		
 		/**
-		 * Provides full single inheritance for constructors
+		 * Provides classical inheritance for constructors
 		 * 
 		 * @param {function} C - Child constructor function
 		 * @param {function|string} P - Parent constructor function or namespace for it
@@ -277,12 +277,12 @@
 			var F = function () {};
 			
 			return function (C, P, copyStatic) {
+				var PProto,
+					CProto;
+					
+				P = typeof P === 'string' && this.ns(P) || P;
+				C = typeof C === 'string' && this.ns(C) || C;
 				copyStatic = copyStatic || false;
-				
-				// parent can be also a namespace
-				if (typeof P === 'string') {
-					P = this.ns(P);
-				}
 				
 				// be strict about the types of parameters given
 				if (typeof C !== 'function') {
@@ -292,16 +292,16 @@
 					throw new TypeError('WN::inherit(): P parameter is expected to be a function, ' + typeof P + ' given.');
 				}
 				
-				var PPrototype = P.prototype,
-					CPrototype = C.prototype;
+				PProto = P.prototype,
+				CProto = C.prototype;
 				
-				F.prototype = PPrototype;
+				F.prototype = PProto;
 				C.prototype = new F();
 				// copy instance properties
-				this.extend(C.prototype, CPrototype);
+				this.extend(C.prototype, CProto);
 
 				C.prototype.constructor = C;
-				C.prototype.parent = PPrototype;
+				C.prototype.parent = PProto;
 				
 				// copy constructor properties
 				if (copyStatic) {
@@ -589,7 +589,7 @@
 	wn.noConflict = function () {
 		global.wn = _wn;
 		return wn;
-	}
+	};
 	
 	// add wn to the global namespace
 	global.wn = wn;
