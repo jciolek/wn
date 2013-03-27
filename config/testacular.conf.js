@@ -29,6 +29,9 @@ reporters = ['progress'];
 // web server port
 port = 8000;
 
+proxies = {
+	'/': 'http://localhost:8800/'
+};
 
 // cli runner port
 runnerPort = 9100;
