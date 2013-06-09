@@ -1,3 +1,3 @@
-wn('require.File5.File7.File8', {
-	name : 'File8'
+wn('File5.File7.File8', {
+	name : 'file8'
 });

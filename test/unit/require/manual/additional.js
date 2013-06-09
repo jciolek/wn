@@ -1,3 +1,3 @@
-wn('require.additionalFile', {
+wn('AdditionalFile', {
 	name: 'additional'
 });

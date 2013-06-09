@@ -1,3 +1,5 @@
-wn('require.File3', {
-	name: 'File3'
+wn.require(['File1', 'File2'], function () {
+	wn('File3', {
+		name: 'file3'
+	});
 });

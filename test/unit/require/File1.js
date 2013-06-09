@@ -1,7 +1,3 @@
-wn('require.File1', {
-	name: 'File1'
+wn('File1', {
+	name: 'file1'
 });
-
-wn('require.File1.extra', {
-	name: 'File1.extra'
-})
